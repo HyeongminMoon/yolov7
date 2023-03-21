@@ -1,0 +1,28 @@
+<main branch>
+
+- bbox yolov7 train
+python train.py --workers 8 --device 0 --batch-size 32 --data data/lens.yaml --img 640 640 --cfg cfg/training/yolov7.yaml --weights saved_models/yolov7.pt --name yolov7_lens --hyp data/hyp.scratch.p5.yaml --notest --epochs 100
+
+- inference
+python detect.py --weights saved_models/yolov7_lens_4.pt --conf 0.25 --img-size 640 --source test0000.jpg
+
+- export
+python export.py --weights saved_models/yolov7_lens_7.pt --grid --end2end --max-wh 640 --dynamic --dynamic-batch
+
+
+
+<mask branch>
+
+- segment yolov7-mask train
+python train.py --workers 8 --device 0 --batch-size 32 --data data/lens.yaml --img 640 640 --cfg cfg/yolov7-mask.yaml --weights saved_models/yolov7-mask.pt --name yolov7_lens_mask --hyp data/hyp.scratch.mask.yaml --notest
+-> 에러 시 lens/train.cache파일 지우고 해볼 것
+
+
+
+<u7 branch>
+
+- segment yolov7-u7 train
+python seg/segment/train.py --data data/lens.yaml --batch 16 --weights saved_models/yolov7-seg.pt --cfg seg/models/segment/yolov7-seg.yaml --epochs 300 --name yolov7-u7 --img 640 --hyp seg/data/hyps/hyp.scratch-high.yaml
+
+- inference
+python seg/segment/predict.py --weights saved_models/yolov7-lens_u7.pt --conf 0.25 --img-size 640 --source download/camera/ --name camera --save-txt
